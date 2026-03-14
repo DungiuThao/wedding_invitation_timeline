@@ -258,41 +258,14 @@ body{background:var(--cream);color:var(--ink);font-family:var(--fn);overflow-x:h
 .back-btn-ghost{background:transparent;border-color:var(--gold);color:var(--white);}
 .back-btn-ghost:hover{background:var(--gold);border-color:var(--gold);color:var(--red2);}
 
-/* ══════════════════════════════
-   NÚT NHẠC NỔI (MỚI THÊM)
-══════════════════════════════ */
-#musicBtn{
-  position:fixed;bottom:24px;right:20px;z-index:8000;
-  width:52px;height:52px;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,#e0ba7a,var(--gold));
-  border:2px solid rgba(255,255,255,.3);
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(0,0,0,.4),0 0 0 0 rgba(201,169,110,.6);
-  transition:transform .2s;
-  -webkit-tap-highlight-color:transparent;
-  animation:fadeUp .9s 1.6s both;
-}
-#musicBtn:hover{transform:scale(1.1);}
-#musicBtn.playing{
-  animation:fadeUp .9s 1.6s both,pulse-ring 1.6s ease-in-out infinite;
-}
-@keyframes pulse-ring{
-  0%  {box-shadow:0 4px 20px rgba(0,0,0,.4),0 0 0 0   rgba(201,169,110,.6);}
-  60% {box-shadow:0 4px 20px rgba(0,0,0,.4),0 0 0 12px rgba(201,169,110,.0);}
-  100%{box-shadow:0 4px 20px rgba(0,0,0,.4),0 0 0 0   rgba(201,169,110,.0);}
-}
-#musicIcon{font-size:22px;line-height:1;color:#6b0909;pointer-events:none;transition:transform .3s;display:block;}
-#musicBtn.playing #musicIcon{animation:spin-note 4s linear infinite;}
-@keyframes spin-note{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-#musicLabel{
-  position:fixed;bottom:8px;right:14px;z-index:8000;
-  font-family:var(--fn);font-size:9px;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(255,255,255,.45);text-align:center;width:52px;
-  pointer-events:none;
-  animation:fadeUp .9s 1.6s both;
-}
+/* ═══ MUSIC BTN ═══ */
+#mbtn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9000;width:50px;height:50px;border-radius:50%;border:2px solid rgba(201,169,110,.5);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:var(--gold);transition:all .3s}
+#mbtn:hover{transform:scale(1.1);border-color:var(--gold)}
+#mbtn.on{background:var(--gold);color:var(--white)}
+#mbtn.on::before{content:'';position:absolute;inset:-7px;border-radius:50%;border:1.5px solid rgba(201,169,110,.3);animation:ring 2s ease-out infinite}
+@keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.45);opacity:0}}
+#mtip{position:fixed;bottom:1.4rem;right:4.8rem;z-index:9000;background:var(--ink);border:1px solid rgba(201,169,110,.3);padding:.45rem .9rem;border-radius:6px;font-family:var(--fh);font-size:.82rem;font-style:italic;color:rgba(255,255,255,.9);white-space:nowrap;opacity:0;transform:translateX(8px);transition:opacity .4s,transform .4s;pointer-events:none}
+#mtip.show{opacity:1;transform:translateX(0)}
 </style>
 </head>
 <body>
@@ -679,18 +652,12 @@ body{background:var(--cream);color:var(--ink);font-family:var(--fn);overflow-x:h
   <div class="lb-film" id="lbFilm"></div>
 </div>
 
-<!-- ══════════════════════════════
-  NHẠC NỀN (MỚI THÊM)
-  Đặt file TigerLaFlorVEVO.mp3 cùng thư mục với HTML
-══════════════════════════════ -->
-<audio id="bgMusic" loop preload="auto">
-  <source src="TigerLaFlorVEVO.mp3" type="audio/mpeg">
+<!-- ═══ MUSIC ═══ -->
+<div id="mbtn"><span id="mnote">♪</span></div>
+<div id="mtip">Nhấn để bật / tắt nhạc</div>
+<audio id="bgm" loop preload="auto">
+  <source src="Tiger.mp3" type="audio/mpeg">
 </audio>
-
-<button id="musicBtn" onclick="toggleMusic()" title="Bật / Tắt nhạc">
-  <span id="musicIcon">🎵</span>
-</button>
-<div id="musicLabel">Nhạc</div>
 
 <script>
 /* ── GOLD WATER RIPPLE ── */
@@ -933,48 +900,18 @@ lbEl.addEventListener('touchend',e=>{
   if(Math.abs(dx)>50)lbNav(dx<0?1:-1);
 },{passive:true});
 
-/* ══════════════════════════════
-   NHẠC NỀN (MỚI THÊM)
-══════════════════════════════ */
-const music = document.getElementById('bgMusic');
-const mBtn  = document.getElementById('musicBtn');
-const mLbl  = document.getElementById('musicLabel');
-let isPlaying = false;
-
-function toggleMusic(){
-  if(isPlaying){
-    music.pause();
-    mBtn.classList.remove('playing');
-    document.getElementById('musicIcon').textContent = '🎵';
-    mLbl.textContent = 'Nhạc';
-    isPlaying = false;
-  } else {
-    music.play().then(()=>{
-      mBtn.classList.add('playing');
-      document.getElementById('musicIcon').textContent = '🎶';
-      mLbl.textContent = 'Đang phát';
-      isPlaying = true;
-    }).catch(()=>{ mLbl.textContent = 'Tap lại'; });
-  }
-}
-
-let autoStarted = false;
-function tryAutoPlay(){
-  if(autoStarted || isPlaying) return;
-  autoStarted = true;
-  music.volume = 0.55;
-  music.play().then(()=>{
-    mBtn.classList.add('playing');
-    document.getElementById('musicIcon').textContent = '🎶';
-    mLbl.textContent = 'Đang phát';
-    isPlaying = true;
-  }).catch(()=>{ autoStarted = false; });
-}
-document.addEventListener('click',    tryAutoPlay, {once:true});
-document.addEventListener('touchend', tryAutoPlay, {once:true, passive:true});
-addEventListener('scroll',    tryAutoPlay, {once:true, passive:true});
-addEventListener('wheel',     tryAutoPlay, {once:true, passive:true});
-addEventListener('touchmove', tryAutoPlay, {once:true, passive:true});
+// ══ MUSIC ══
+const audio=document.getElementById('bgm'),btn=document.getElementById('mbtn'),tip=document.getElementById('mtip'),note=document.getElementById('mnote');
+let on=false;audio.volume=0.4;
+function showTip(m,ms=3200){tip.textContent=m;tip.classList.add('show');setTimeout(()=>tip.classList.remove('show'),ms)}
+function setOn(s){on=s;btn.classList.toggle('on',s);note.textContent=s?'♫':'♪';s?audio.play():audio.pause()}
+btn.addEventListener('click',()=>setOn(!on));
+window.addEventListener('load',()=>setTimeout(()=>{
+  audio.play().then(()=>{setOn(true);showTip('♪ Đang phát nhạc')}).catch(()=>{
+    showTip('Chạm vào đây để bật nhạc ♪',5000);
+    const u=()=>{setOn(true);document.removeEventListener('click',u);document.removeEventListener('touchstart',u)};
+    document.addEventListener('click',u);document.addEventListener('touchstart',u);
+  });
 </script>
 </body>
 </html>
